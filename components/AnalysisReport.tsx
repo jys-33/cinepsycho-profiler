@@ -188,14 +188,14 @@ const AnalysisReport: React.FC<AnalysisReportProps> = ({ data, username }) => {
                  </span>
                  <p className="text-gray-300 text-sm leading-relaxed">{data.layer1.hatedAnalysis}</p>
                </div>
-               {data.layer1.bookMusicAnalysis && (
+               {/*{data.layer1.bookMusicAnalysis && (
                   <div className="bg-green-500/10 p-5 rounded-2xl border border-green-200/20">
                       <span className="block text-green-300 font-bold mb-2 uppercase text-xs tracking-wider flex items-center gap-2">
                           📚🎵 书音品味
                       </span>
                       <p className="text-gray-300 text-sm leading-relaxed">{data.layer1.bookMusicAnalysis}</p>
                   </div>
-               )}
+               )}*/}
             </div>
           </div>
 

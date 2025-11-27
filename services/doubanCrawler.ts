@@ -4,34 +4,48 @@ import { ReviewItem } from "../types";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// 解析 HTML 的逻辑 (保持不变，复制粘贴即可)
+// --- 修改后的 parseDoubanPage ---
+
 const parseDoubanPage = (html: string, category: 'movie' | 'book' | 'music'): ReviewItem[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     const data: ReviewItem[] = [];
-    
+
     // 检查反爬或权限标题
     const title = doc.querySelector('title')?.textContent || "";
-    // 如果没登录看别人的主页，有时候遇到“禁止访问”就是IP频率过高
     if (title.includes("禁止访问") || title.includes("登录豆瓣")) {
-         // 这里不抛出死错误，而是返回空数组让主逻辑处理，或者抛特定错
          console.warn(`[Douban Block] 标题提示异常: ${title}`);
     }
 
-    const items = doc.querySelectorAll(".item");
+    // --- 核心修复：同时查找 .item (电影网格) 和 .subject-item (书/音列表) ---
+    const items = doc.querySelectorAll(".item, .subject-item");
+
     items.forEach((item) => {
         try {
-            const title = item.querySelector(".title a")?.textContent?.trim() || "";
+            // 1. 标题兼容性处理：
+            // 电影(.item)通常在 .title a
+            // 书音(.subject-item)通常在 .info h2 a
+            const titleEl = item.querySelector(".title a") || item.querySelector(".info h2 a");
+            const title = titleEl?.textContent?.trim() || "";
+
+            // 2. 评分提取 (保持原有逻辑，通用性较好)
             let rating = 0;
             const ratingSpan = item.querySelector('[class^="rating"]');
             if (ratingSpan) {
                 const match = ratingSpan.className.match(/rating(\d)-t/);
                 if (match) rating = parseInt(match[1]);
             }
-            const comment = item.querySelector(".comment")?.textContent?.trim() || "";
-            const date = item.querySelector(".date")?.textContent?.trim() || "";
-            
-            // 简单的标签提取
+
+            // 3. 评论兼容性处理：
+            // 书/音的评论有时在 .short-note .comment，有时直接在 .short-note 中
+            const commentEl = item.querySelector(".comment") || item.querySelector(".short-note");
+            const comment = commentEl?.textContent?.trim() || "";
+
+            // 4. 日期提取 (通常 .date 是通用的，但有时需要去 .info 里找)
+            const dateEl = item.querySelector(".date");
+            const date = dateEl?.textContent?.trim() || "";
+
+            // 5. 标签提取
             const tags: string[] = [];
             const tagEl = item.querySelector(".tags");
             if (tagEl && tagEl.textContent) {
@@ -39,10 +53,13 @@ const parseDoubanPage = (html: string, category: 'movie' | 'book' | 'music'): Re
                 if (tagText) tags.push(...tagText.split(/\s+/));
             }
 
+            // 只有当标题存在时才推入数据
             if(title) {
                 data.push({ title, rating, comment, date, category, tags });
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error("解析单条数据失败", e);
+        }
     });
     return data;
 };
@@ -84,7 +101,7 @@ export const crawlUserReviews = async (
     userCookie: string, 
     onLog: (msg: string) => void
 ): Promise<ReviewItem[]> => {
-    const categories = ['movie', 'book', 'music'] as const;
+    const categories = ['movie'] as const;
     const allReviews: ReviewItem[] = [];
 
     onLog(`🔌 模式: 本地直连 (My IP)`);
@@ -101,7 +118,7 @@ export const crawlUserReviews = async (
         
         // 分页设置：
         // 如果有 Cookie，一般能爬更多；没有 Cookie 很容易被限流，我们这里保守一点
-        const maxPages = 30; 
+        const maxPages = 4;
         
         let start = 0;
         

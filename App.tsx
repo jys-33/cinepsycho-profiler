@@ -284,7 +284,7 @@ const App: React.FC = () => {
                       )}
 
                       {/* --- 功能开关区域 --- */}
-                      <div className="bg-white/5 border border-white/5 rounded-2xl p-2 mt-4">
+                      {/*  <div className="bg-white/5 border border-white/5 rounded-2xl p-2 mt-4">
                         <label className="flex items-center space-x-3 cursor-pointer group p-3 rounded-xl hover:bg-white/5 transition-all">
                             <div className="relative">
                               <input 
@@ -304,7 +304,7 @@ const App: React.FC = () => {
                                 </span>
                             </div>
                         </label>
-                      </div>
+                      </div>*/}
                       {/* 🌶️ 模式选择开关 */}
                       <div className="bg-white/5 border border-white/5 rounded-2xl p-2 flex relative">
                               <div className="flex w-full bg-black/40 rounded-xl p-1 relative z-0">
@@ -393,7 +393,7 @@ const App: React.FC = () => {
              <div>
                 <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-purple-200 mb-3">AI 正在深度解构</h2>
                 <p className="text-purple-200/60 font-light text-lg">
-                  正在基于 {analyzedCount} 条 (书/影/音) 记录...
+                  正在基于 {analyzedCount} 条记录...
                   <br/>
                   <span className="text-sm mt-2 block text-purple-300/50">
                     {enableImageGen 
