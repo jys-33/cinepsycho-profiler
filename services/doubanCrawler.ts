@@ -67,7 +67,7 @@ const parseDoubanPage = (html: string, category: 'movie' | 'book' | 'music'): Re
 // --- 唯一的抓取通道：走本地 Node 服务 (即使用你的 IP) ---
 const fetchViaLocalServer = async (targetUrl: string, cookie: string): Promise<string> => {
     // 指向你的 proxy.js 地址
-    const localProxy = `http://localhost:3001/fetch`;
+    const localProxy = `/fetch`;
     
     // 哪怕没有 cookie，也要传个空字符串过去，proxy.js 会处理
     const encodedCookie = encodeURIComponent(cookie || '');
